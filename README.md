@@ -238,7 +238,7 @@ python-decouple
 
 **Profesor:** Urbano Eliécer Gómez Prada  
 **Materia:** Ingeniería de Software II  
-**Universidad:** UDI — Bucaramanga, Colombia
+**Universidad:** Universidad Industrial de Santander (UIS) — Bucaramanga, Colombia
 
 ---
 

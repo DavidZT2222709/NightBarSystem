@@ -1,0 +1,8 @@
+django
+djangorestframework
+djangorestframework-simplejwt   # Autenticación JWT
+django-channels                 # WebSockets para tiempo real
+channels-redis                  # Backend para Channels
+psycopg2-binary                 # Conector PostgreSQL
+python-decouple                 # Variables de entorno desde .env
+django-cors-headers             # CORS para el frontend React

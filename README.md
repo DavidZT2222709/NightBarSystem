@@ -226,6 +226,7 @@ djangorestframework-simplejwt
 django-cors-headers
 psycopg2-binary
 python-decouple
+drf-spectacular
 ```
 
 ---

@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'apps.orders',
     'apps.tables',
     'apps.stats',
+
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -124,8 +126,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+
     'PAGE_SIZE': 20,
+
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -134,6 +140,12 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS':  True,                 # Cada refresh genera un token nuevo
     'BLACKLIST_AFTER_ROTATION': True,               # El token viejo queda invalidado
     'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'IroMarket API',
+    'DESCRIPTION': 'Sistema de gestión de pedidos para disco-bares',
+    'VERSION': '1.0.0',
 }
 
 AUTH_USER_MODELS = 'users.User'

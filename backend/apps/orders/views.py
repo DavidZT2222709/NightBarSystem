@@ -1,60 +1,94 @@
-from rest_framework import generics
-from .models import Order
-from .serializers import OrderSerializer, OrderStatusSerializer
-from apps.users.permissions import IsMesero, IsBartender
-from django.utils import timezone
+# apps/orders/views.py
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
-class CreateOrderView(generics.CreateAPIView):
-    """RF-004 al RF-007: El mesero crea y envía un pedido."""
-    serializer_class   = OrderSerializer
-    permission_classes = [IsMesero]
+# Importamos los modelos y serializadores
+from .models import Pedido
+from .serializers import PedidoSerializer
+
+# Importamos los permisos de tu app de usuarios
+from apps.users.permissions import EsMesero, EsBartender
+
+class PedidoViewSet(viewsets.ModelViewSet):
+    serializer_class = PedidoSerializer
+    permission_classes = [IsAuthenticated] # Base de seguridad: nadie sin token entra aquí
+
+    def get_queryset(self):
+        """
+        ¡La magia de IroMarket ocurre aquí!
+        El endpoint /api/orders/ devuelve datos diferentes dependiendo de QUIÉN pregunte.
+        """
+        user = self.request.user
+        
+        # 1. Vista del Bartender (RF-008: Cola FIFO)
+        if user.rol.nombre == 'Bartender':
+            # Solo ve pedidos 'pending' o 'preparing'.
+            # .order_by('creado_en') ordena del más viejo al más nuevo (First In, First Out)
+            return Pedido.objects.filter(estado__in=['pending', 'preparing']).order_by('creado_en')
+            
+        # 2. Vista del Mesero
+        elif user.rol.nombre == 'Mesero':
+            # El mesero solo ve SUS propios pedidos.
+            # .order_by('-creado_en') ordena del más nuevo al más viejo (LIFO) para que 
+            # vea primero el pedido que acaba de enviar.
+            return Pedido.objects.filter(mesero=user).order_by('-creado_en')
+            
+        # 3. Vista del Administrador
+        elif user.rol.nombre == 'Administrador':
+            # El Admin ve todo el historial para las estadísticas
+            return Pedido.objects.all().order_by('-creado_en')
+
+        # Por seguridad, si hay un rol fantasma, no devuelve nada
+        return Pedido.objects.none()
+
+    def get_permissions(self):
+        """
+        Restricciones estrictas por método HTTP.
+        """
+        if self.action == 'create':
+            # Solo los meseros pueden generar comandas (POST)
+            return [EsMesero()]
+        return super().get_permissions()
 
     def perform_create(self, serializer):
+        """
+        RF-004: Cuando el mesero crea el pedido desde la app React Native, 
+        no necesita enviar su ID. Lo sacamos de su token JWT.
+        """
         serializer.save(mesero=self.request.user)
 
+    @action(detail=True, methods=['patch'])
+    def cambiar_estado(self, request, pk=None):
+        """
+        Endpoint personalizado para que el Bartender cambie el estado con un simple botón.
+        Ruta: PATCH /api/orders/{id_pedido}/cambiar_estado/
+        Body: {"estado": "preparing"} o {"estado": "delivered"}
+        """
+        pedido = self.get_object()
+        nuevo_estado = request.data.get('estado')
+        user = request.user
 
-class OrderQueueView(generics.ListAPIView):
-    """RF-008: El bartender ve los pedidos en orden de llegada."""
-    serializer_class   = OrderSerializer
-    permission_classes = [IsBartender]
+        # Validar que el estado sea correcto
+        if nuevo_estado not in ['pending', 'preparing', 'delivered']:
+            return Response(
+                {"error": "Estado no válido. Use 'pending', 'preparing' o 'delivered'."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-    def get_queryset(self):
-        queryset = self.queryset.exclude(status='delivered')
-        status = self.request.query_params.get('status')
-        if status:
-            queryset = queryset.filter(status=status)
+        # Solo el Bartender (y el Admin en caso de emergencia) pueden cambiar estados
+        if user.rol.nombre == 'Mesero':
+            return Response(
+                {"error": "Acceso denegado. Un mesero no puede despachar pedidos."}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        return queryset
-
-
-
-class UpdateOrderStatusView(generics.UpdateAPIView):
-    """RF-009 y RF-010: El bartender cambia el estado del pedido."""
-    serializer_class   = OrderStatusSerializer
-    permission_classes = [IsBartender]
-    queryset           = Order.objects.all()
-    http_method_names  = ['patch']
-
-
-class MyOrdersView(generics.ListAPIView):
-    """El mesero consulta el estado de sus pedidos activos."""
-    serializer_class   = OrderSerializer
-    permission_classes = [IsMesero]
-
-    def get_queryset(self):
-        return Order.objects.filter(
-            mesero=self.request.user
-        ).exclude(status='delivered')
-
-class OrderHistoryView(generics.ListAPIView):
-    """Pedidos entregados del día actual."""
-    serializer_class   = OrderSerializer
-    permission_classes = [IsMesero]
-
-    def get_queryset(self):
-        today = timezone.now().date()
-        return Order.objects.filter(
-            mesero=self.request.user,
-            status='delivered',
-            created_at__date=today
-        )
+        pedido.estado = nuevo_estado
+        pedido.save()
+        
+        return Response({
+            "message": "Estado del pedido actualizado correctamente",
+            "pedido_id": pedido.id,
+            "nuevo_estado": pedido.estado
+        }, status=status.HTTP_200_OK)

@@ -1,12 +1,37 @@
-from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Categoria, Producto
+from .serializers import CategoriaSerializer, ProductoSerializer
 
-class ProductListView(generics.ListAPIView):
-    """Todos los roles pueden ver el catálogo de productos."""
-    serializer_class   = ProductSerializer
-    permission_classes = [IsAuthenticated]
+from apps.users.permissions import EsAdministrador
 
+class ProductoViewSet(viewsets.ModelViewSet):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
+
+    """
+    Función para que el administrador tenga los siguientes permisos:
+    - Crear, Actualizar y Eliminar
+    - Ver (list/retriever): Cualquier usuario autenticado (Mesero, Bartender)
+    """
+    def get_permissions(self):
+
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [EsAdministrador()]
+        return [IsAuthenticated()]
+    
     def get_queryset(self):
-        return Product.objects.filter(available=True)
+
+        user = self.request.user
+        if user.IsAuthenticated and user.rol.nombre != 'Administrador':
+            return Producto.objects.filter(disponible=True)
+        return Producto.objects.all()
+    
+class CategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [EsAdministrador()]
+        return [IsAuthenticated()]

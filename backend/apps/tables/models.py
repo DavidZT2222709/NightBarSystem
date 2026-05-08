@@ -1,13 +1,18 @@
 from django.db import models
 
-# Create your models here.
 class Table(models.Model):
-    class Status(models.TextChoices):
-        AVAILABLE = 'available', 'Disponible'
-        OCCUPIED = 'occupied', 'Ocupadad'
+    ESTADOS_MESA = [
+        ('available', 'Disponible'),
+        ('occupied', 'Ocupada'),
+    ]
 
-    number = models.PositiveBigIntegerField(unique=True)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.AVAILABLE)
+    numero = models.PositiveIntegerField(unique=True)
+
+    capacidad = models.PositiveIntegerField(default=4)
+
+    estado = models.CharField(max_length=20, choices=ESTADOS_MESA, default='available')
 
     def __str__(self):
-        return f"Mesa {self.number} - {self.Status}"
+        return f"Mesa {self.numero} - {self.get.estado_display()}"
+    
+    

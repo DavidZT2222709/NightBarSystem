@@ -1,17 +1,31 @@
+# apps/orders/admin.py
 from django.contrib import admin
-from .models import Order, OrderItem
+from .models import Pedido, DetallePedido
 
-class OrderItemInline(admin.TabularInline):
-    model  = OrderItem
-    extra  = 0
+class DetallePedidoInline(admin.TabularInline):
+    model = DetallePedido
+    extra = 0 # No mostrar filas vacías por defecto
+    readonly_fields = ('subtotal',)
+    # Evita que se borren detalles de pedidos ya cerrados por accidente
+    can_delete = False 
 
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display  = ['id', 'mesero', 'table', 'status', 'created_at']
-    list_filter   = ['status']
-    ordering      = ['created_at']
-    inlines       = [OrderItemInline]  # Muestra los items dentro del pedido
+@admin.register(Pedido)
+class PedidoAdmin(admin.ModelAdmin):
+    # Columnas principales
+    list_display = ('id', 'mesa', 'mesero', 'estado', 'total_pedido', 'creado_en')
+    
+    # Filtros para auditoría rápida
+    list_filter = ('estado', 'creado_en', 'mesero')
+    
+    # Búsqueda por mesa o ID
+    search_fields = ('id', 'mesa__numero', 'mesero__nombre')
+    
+    # Integración de los detalles dentro de la vista del pedido
+    inlines = [DetallePedidoInline]
+    
+    # Colores o iconos para el estado (opcional pero muy útil)
+    list_editable = ('estado',) # Permite al admin corregir estados desde la lista
 
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ['order', 'product', 'quantity']
+    def total_pedido(self, obj):
+        return f"${obj.total_pedido:,.2f}"
+    total_pedido.short_description = "Total COP"

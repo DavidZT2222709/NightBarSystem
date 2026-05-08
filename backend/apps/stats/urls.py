@@ -1,7 +1,11 @@
-from django.urls import path
-from .views import DailyStatsView, MonthlyStatsView
+# apps/stats/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ReporteDiarioViewSet
+
+router = DefaultRouter()
+router.register(r'reportes', ReporteDiarioViewSet, basename='reportes')
 
 urlpatterns = [
-    path('daily/',   DailyStatsView.as_view()),    # GET /api/stats/daily/
-    path('monthly/', MonthlyStatsView.as_view()),  # GET /api/stats/monthly/
+    path('', include(router.urls)),
 ]

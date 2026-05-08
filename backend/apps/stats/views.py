@@ -1,80 +1,72 @@
-from rest_framework.views import APIView
+# apps/stats/views.py
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models import Sum, Count, F
-from apps.orders.models import Order, OrderItem
-from apps.users.permissions import IsAdmin
 
-class DailyStatsView(APIView):
-    """Estadísticas del día para el administrador."""
-    permission_classes = [IsAuthenticated]
+from .models import ReporteDiario
+from .serializers import ReporteDiarioSerializer
+from apps.users.permissions import EsAdministrador
+from apps.orders.models import Pedido, DetallePedido
 
-    def get(self, request):
-        today = timezone.now().date()
-        orders_today = Order.objects.filter(
-            status='delivered',
-            created_at__date=today
+class ReporteDiarioViewSet(viewsets.ModelViewSet):
+    # Ordenamos del reporte más reciente al más antiguo
+    queryset = ReporteDiario.objects.all().order_by('-fecha')
+    serializer_class = ReporteDiarioSerializer
+    
+    # Nadie más que el 'jefe final' (Admin) debería ver la plata del negocio
+    permission_classes = [EsAdministrador] 
+
+    @action(detail=False, methods=['post'])
+    def generar_corte_hoy(self, request):
+        """
+        Calcula las métricas del día actual y las consolida en la tabla de estadísticas.
+        """
+        hoy = timezone.now().date()
+
+        # 1. Calcular Ingresos Totales de hoy
+        ingresos = Pedido.objects.filter(
+            estado='delivered', creado_en__date=hoy
+        ).aggregate(
+            total=Sum(F('detalles__cantidad') * F('detalles__precio_unitario'))
+        )['total'] or 0
+
+        # 2. Total de pedidos
+        pedidos_totales = Pedido.objects.filter(estado='delivered', creado_en__date=hoy).count()
+
+        # 3. Producto Estrella (El más vendido)
+        top_producto = DetallePedido.objects.filter(
+            pedido__estado='delivered', pedido__creado_en__date=hoy
+        ).values('producto__nombre').annotate(
+            vendidos=Sum('cantidad')
+        ).order_by('-vendidos').first()
+        
+        nombre_top_producto = top_producto['producto__nombre'] if top_producto else "Ninguno"
+
+        # 4. Mesero MVP
+        top_mesero = Pedido.objects.filter(
+            estado='delivered', creado_en__date=hoy
+        ).values('mesero__nombre').annotate(
+            atendidos=Count('id')
+        ).order_by('-atendidos').first()
+
+        nombre_top_mesero = top_mesero['mesero__nombre'] if top_mesero else "Ninguno"
+
+        # 5. Guardar el "Save State" en la base de datos
+        # update_or_create permite que si el admin presiona el botón dos veces por error, 
+        # simplemente actualice los datos de hoy en lugar de crear un reporte duplicado.
+        reporte, created = ReporteDiario.objects.update_or_create(
+            fecha=hoy,
+            defaults={
+                'ingresos_totales': ingresos,
+                'pedidos_completados': pedidos_totales,
+                'producto_estrella': nombre_top_producto,
+                'mesero_destacado': nombre_top_mesero
+            }
         )
 
-        # Total de ingresos del día
-        total_revenue = orders_today.annotate(
-            order_total=Sum(
-                F('items__quantity') * F('items__product__price')
-            )
-        ).aggregate(total=Sum('order_total'))['total'] or 0
-
-        # Total de pedidos entregados
-        total_orders = orders_today.count()
-
-        # Productos más pedidos
-        top_products = OrderItem.objects.filter(
-            order__status='delivered',
-            order__created_at__date=today
-        ).values(
-            name=F('product__name')
-        ).annotate(
-            total_quantity=Sum('quantity'),
-            total_revenue=Sum(F('quantity') * F('product__price'))
-        ).order_by('-total_quantity')[:5]
-
-        # Pedidos por mesero
-        orders_by_mesero = orders_today.values(
-            mesero=F('mesero__username')
-        ).annotate(
-            total_orders=Count('id')
-        ).order_by('-total_orders')
-
         return Response({
-            'date':              str(today),
-            'total_revenue':     total_revenue,
-            'total_orders':      total_orders,
-            'top_products':      list(top_products),
-            'orders_by_mesero':  list(orders_by_mesero),
-        })
-
-
-class MonthlyStatsView(APIView):
-    """Ingresos y pedidos agrupados por día del mes actual."""
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        today  = timezone.now().date()
-        orders = Order.objects.filter(
-            status='delivered',
-            created_at__year=today.year,
-            created_at__month=today.month
-        ).annotate(
-            day=F('created_at__date')
-        ).values('day').annotate(
-            total_orders=Count('id'),
-            total_revenue=Sum(
-                F('items__quantity') * F('items__product__price')
-            )
-        ).order_by('day')
-
-        return Response({
-            'month':  today.month,
-            'year':   today.year,
-            'data':   list(orders)
-        })
+            "mensaje": "¡Corte de caja guardado con éxito!",
+            "reporte": ReporteDiarioSerializer(reporte).data
+        }, status=status.HTTP_200_OK)

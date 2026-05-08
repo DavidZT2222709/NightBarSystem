@@ -4,3 +4,11 @@ env
 __pycache__
 *.pyc
 *.pyo
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Django migrations (opcional, según tu flujo)
+*/migrations/*
+!*/migrations/__init__.py

@@ -1,7 +1,11 @@
-from django.urls import path
-from .views import TableListView, TableUpdateView
+# apps/tables/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import TableViewSet
+
+router = DefaultRouter()
+router.register(r'', TableViewSet, basename='tables')
 
 urlpatterns = [
-    path('',          TableListView.as_view()),    # GET   /api/tables/
-    path('<int:pk>/', TableUpdateView.as_view()),  # PATCH /api/tables/{id}/
+    path('', include(router.urls)),
 ]

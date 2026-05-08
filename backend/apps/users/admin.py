@@ -22,6 +22,12 @@ class CustomUserAdmin(UserAdmin):
         ('Fechas Importantes', {'fields': ('last_login', 'date_joined')}),
     )
 
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Información de IroMarket', {
+            'fields': ('email', 'nombre', 'numero_telefono', 'rol'),
+        }),
+    )
+
 @admin.register(Rol)
 class RolAdmin(admin.ModelAdmin):
     # Muestra el ID y el nombre para que sea más fácil de gestionar

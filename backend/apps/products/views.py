@@ -23,7 +23,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         user = self.request.user
-        if user.IsAuthenticated and user.rol.nombre != 'Administrador':
+        if user.is_authenticated and user.rol.nombre != 'Administrador':
             return Producto.objects.filter(disponible=True)
         return Producto.objects.all()
     

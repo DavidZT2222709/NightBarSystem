@@ -1,9 +1,11 @@
-django
-djangorestframework
-djangorestframework-simplejwt   # Autenticación JWT
-django-channels                 # WebSockets para tiempo real
-channels-redis                  # Backend para Channels
-psycopg2-binary                 # Conector PostgreSQL
-python-decouple                 # Variables de entorno desde .env
-django-cors-headers             # CORS para el frontend React
-drf-spectacular                 # Generación de documentación API
+Django==5.2.6
+djangorestframework==3.16.1
+Pillow==10.3.0
+django-cors-headers==4.9.0
+django-filter==25.1
+djangorestframework-simplejwt==5.3.1
+django_rest_passwordreset==1.5.0
+python-decouple==3.8
+social-auth-app-django==5.6.0
+drf-spectacular
+drf_yasg              # Generación de documentación API

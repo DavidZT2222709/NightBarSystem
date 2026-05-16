@@ -1,4 +1,5 @@
 # apps/orders/views.py
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,84 +12,128 @@ from .serializers import PedidoSerializer
 # Importamos los permisos de tu app de usuarios
 from apps.users.permissions import EsMesero, EsBartender
 
+
 class PedidoViewSet(viewsets.ModelViewSet):
     serializer_class = PedidoSerializer
-    permission_classes = [IsAuthenticated] # Base de seguridad: nadie sin token entra aquí
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """
-        ¡La magia de IroMarket ocurre aquí!
-        El endpoint /api/orders/ devuelve datos diferentes dependiendo de QUIÉN pregunte.
+        Retorna diferentes pedidos dependiendo del rol del usuario.
         """
+
+        # 🔥 Evita errores cuando Swagger genera la documentación
+        if getattr(self, 'swagger_fake_view', False):
+            return Pedido.objects.none()
+
         user = self.request.user
-        
-        # 1. Vista del Bartender (RF-008: Cola FIFO)
-        if user.rol.nombre == 'Bartender':
-            # Solo ve pedidos 'pending' o 'preparing'.
-            # .order_by('creado_en') ordena del más viejo al más nuevo (First In, First Out)
-            return Pedido.objects.filter(estado__in=['pending', 'preparing']).order_by('creado_en')
-            
+
+        # 🔥 Seguridad extra
+        if not user.is_authenticated:
+            return Pedido.objects.none()
+
+        # 🔥 Evita error si el usuario no tiene rol
+        rol_nombre = getattr(user.rol, 'nombre', None)
+
+        # 1. Vista del Bartender (FIFO)
+        if rol_nombre == 'Bartender':
+
+            return Pedido.objects.filter(
+                estado__in=['pending', 'preparing']
+            ).order_by('creado_en')
+
         # 2. Vista del Mesero
-        elif user.rol.nombre == 'Mesero':
-            # El mesero solo ve SUS propios pedidos.
-            # .order_by('-creado_en') ordena del más nuevo al más viejo (LIFO) para que 
-            # vea primero el pedido que acaba de enviar.
-            return Pedido.objects.filter(mesero=user).order_by('-creado_en')
-            
+        elif rol_nombre == 'Mesero':
+
+            return Pedido.objects.filter(
+                mesero=user
+            ).order_by('-creado_en')
+
         # 3. Vista del Administrador
-        elif user.rol.nombre == 'Administrador':
-            # El Admin ve todo el historial para las estadísticas
+        elif rol_nombre == 'Administrador':
+
             return Pedido.objects.all().order_by('-creado_en')
 
-        # Por seguridad, si hay un rol fantasma, no devuelve nada
+        # Rol desconocido
         return Pedido.objects.none()
 
     def get_permissions(self):
         """
         Restricciones estrictas por método HTTP.
         """
+
         if self.action == 'create':
-            # Solo los meseros pueden generar comandas (POST)
             return [EsMesero()]
+
         return super().get_permissions()
 
     def perform_create(self, serializer):
         """
-        RF-004: Cuando el mesero crea el pedido desde la app React Native, 
-        no necesita enviar su ID. Lo sacamos de su token JWT.
+        Asigna automáticamente el mesero desde el token JWT.
         """
+
         serializer.save(mesero=self.request.user)
 
     @action(detail=True, methods=['patch'])
     def cambiar_estado(self, request, pk=None):
         """
-        Endpoint personalizado para que el Bartender cambie el estado con un simple botón.
-        Ruta: PATCH /api/orders/{id_pedido}/cambiar_estado/
-        Body: {"estado": "preparing"} o {"estado": "delivered"}
+        PATCH /api/orders/{id}/cambiar_estado/
+
+        Body:
+        {
+            "estado": "preparing"
+        }
         """
+
         pedido = self.get_object()
+
         nuevo_estado = request.data.get('estado')
+
         user = request.user
 
-        # Validar que el estado sea correcto
-        if nuevo_estado not in ['pending', 'preparing', 'delivered']:
+        # 🔥 Seguridad extra
+        if not user.is_authenticated:
             return Response(
-                {"error": "Estado no válido. Use 'pending', 'preparing' o 'delivered'."}, 
+                {"error": "Usuario no autenticado."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        rol_nombre = getattr(user.rol, 'nombre', None)
+
+        # Validar estado
+        if nuevo_estado not in ['pending', 'preparing', 'delivered']:
+
+            return Response(
+                {
+                    "error": (
+                        "Estado no válido. "
+                        "Use 'pending', 'preparing' o 'delivered'."
+                    )
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Solo el Bartender (y el Admin en caso de emergencia) pueden cambiar estados
-        if user.rol.nombre == 'Mesero':
+        # El mesero NO puede cambiar estados
+        if rol_nombre == 'Mesero':
+
             return Response(
-                {"error": "Acceso denegado. Un mesero no puede despachar pedidos."}, 
+                {
+                    "error": (
+                        "Acceso denegado. "
+                        "Un mesero no puede despachar pedidos."
+                    )
+                },
                 status=status.HTTP_403_FORBIDDEN
             )
 
         pedido.estado = nuevo_estado
         pedido.save()
-        
-        return Response({
-            "message": "Estado del pedido actualizado correctamente",
-            "pedido_id": pedido.id,
-            "nuevo_estado": pedido.estado
-        }, status=status.HTTP_200_OK)
+
+        return Response(
+            {
+                "message": "Estado del pedido actualizado correctamente",
+                "pedido_id": pedido.id,
+                "nuevo_estado": pedido.estado
+            },
+            status=status.HTTP_200_OK
+        )

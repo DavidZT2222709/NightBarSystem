@@ -8,4 +8,10 @@ django_rest_passwordreset==1.5.0
 python-decouple==3.8
 social-auth-app-django==5.6.0
 drf-spectacular
-drf_yasg              # Generación de documentación API
+drf_yasg
+
+# Producción
+gunicorn==21.2.0
+psycopg2-binary==2.9.9
+whitenoise==6.7.0
+dj-database-url==2.2.0

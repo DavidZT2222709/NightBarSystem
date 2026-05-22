@@ -1,14 +1,25 @@
-env
-.env
+# Virtual environments
+env/
+venv/
+.venv/
 
-__pycache__
-*.pyc
-*.pyo
+# Environment variables
+.env
 
 # Python cache
 __pycache__/
 *.py[cod]
+*.pyo
 
-# Django migrations (opcional, según tu flujo)
-*/migrations/*
-!*/migrations/__init__.py
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# SQLite
+db.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db

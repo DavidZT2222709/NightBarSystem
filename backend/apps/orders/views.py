@@ -3,6 +3,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db import transaction
+from django.db.models import Q, F
+from django.utils import timezone
 
 # Importamos los modelos y serializadores
 from .models import Pedido
@@ -10,6 +13,7 @@ from .serializers import PedidoSerializer
 
 # Importamos los permisos de tu app de usuarios
 from apps.users.permissions import EsMesero, EsBartender
+from apps.products.models import Producto
 
 class PedidoViewSet(viewsets.ModelViewSet):
     serializer_class = PedidoSerializer
@@ -24,9 +28,11 @@ class PedidoViewSet(viewsets.ModelViewSet):
         
         # 1. Vista del Bartender (RF-008: Cola FIFO)
         if user.rol.nombre == 'Bartender':
-            # Solo ve pedidos 'pending' o 'preparing'.
-            # .order_by('creado_en') ordena del más viejo al más nuevo (First In, First Out)
-            return Pedido.objects.filter(estado__in=['pending', 'preparing']).order_by('creado_en')
+            today = timezone.localdate()
+            return Pedido.objects.filter(
+                Q(estado__in=['pending', 'preparing']) |
+                Q(estado='delivered', creado_en__date=today)
+            ).order_by('creado_en')
             
         # 2. Vista del Mesero
         elif user.rol.nombre == 'Mesero':
@@ -80,13 +86,23 @@ class PedidoViewSet(viewsets.ModelViewSet):
         # Solo el Bartender (y el Admin en caso de emergencia) pueden cambiar estados
         if user.rol.nombre == 'Mesero':
             return Response(
-                {"error": "Acceso denegado. Un mesero no puede despachar pedidos."}, 
+                {"error": "Acceso denegado. Un mesero no puede despachar pedidos."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        pedido.estado = nuevo_estado
-        pedido.save()
-        
+        estado_anterior = pedido.estado
+
+        with transaction.atomic():
+            pedido.estado = nuevo_estado
+            pedido.save()
+
+            # Descontar stock solo al pasar a 'delivered' por primera vez
+            if nuevo_estado == 'delivered' and estado_anterior != 'delivered':
+                for detalle in pedido.detalles.all():
+                    Producto.objects.filter(pk=detalle.producto_id).update(
+                        stock=F('stock') - detalle.cantidad
+                    )
+
         return Response({
             "message": "Estado del pedido actualizado correctamente",
             "pedido_id": pedido.id,

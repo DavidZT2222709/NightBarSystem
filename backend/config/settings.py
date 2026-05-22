@@ -13,9 +13,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- SEGURIDAD ---
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', default='*').split(',')
 
-# --- DEFINICIÓN DE APLICACIONES ---
+# SECURITY WARNING: don't run with debug turned on in production!
+
+ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -98,7 +103,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # --- MODELO DE USUARIO PERSONALIZADO ---
 # CORRECCIÓN: Estaba en plural y con nombre incorrecto.
-AUTH_USER_MODEL = 'users.Usuario'
 
 # --- DJANGO REST FRAMEWORK ---
 REST_FRAMEWORK = {
@@ -125,8 +129,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('GOOGLE_OAUTH2_KEY', default='')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('GOOGLE_OAUTH2_SECRET', default='')
+AUTH_USER_MODEL = 'users.Usuario'
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
@@ -137,9 +140,10 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
-    'apps.usuarios.pipelines.save_profile',        
-    'apps.usuarios.pipelines.asignar_rol_por_defecto', 
-    'apps.usuarios.pipelines.create_jwt_token_with_role', 
+   'apps.users.pipelines.associate_by_email',
+'apps.users.pipelines.save_profile',
+'apps.users.pipelines.asignar_rol_por_defecto',
+'apps.users.pipelines.create_jwt_token_with_role', 
 )
 
 # --- CORS ---

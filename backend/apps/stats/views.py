@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 from django.db.models import Sum, Count, F
+from django.db.models.functions import Coalesce
 
 from .models import ReporteDiario
 from .serializers import ReporteDiarioSerializer
@@ -23,7 +24,7 @@ class ReporteDiarioViewSet(viewsets.ModelViewSet):
         """
         Calcula las métricas del día actual y las consolida en la tabla de estadísticas.
         """
-        hoy = timezone.now().date()
+        hoy = timezone.localdate()
 
         # 1. Calcular Ingresos Totales de hoy
         ingresos = Pedido.objects.filter(
@@ -44,14 +45,16 @@ class ReporteDiarioViewSet(viewsets.ModelViewSet):
         
         nombre_top_producto = top_producto['producto__nombre'] if top_producto else "Ninguno"
 
-        # 4. Mesero MVP
+        # 4. Mesero MVP — usa nombre si está definido, si no cae a username
         top_mesero = Pedido.objects.filter(
             estado='delivered', creado_en__date=hoy
-        ).values('mesero__nombre').annotate(
+        ).annotate(
+            nombre_display=Coalesce('mesero__nombre', 'mesero__username')
+        ).values('nombre_display').annotate(
             atendidos=Count('id')
         ).order_by('-atendidos').first()
 
-        nombre_top_mesero = top_mesero['mesero__nombre'] if top_mesero else "Ninguno"
+        nombre_top_mesero = top_mesero['nombre_display'] if top_mesero else "Ninguno"
 
         # 5. Guardar el "Save State" en la base de datos
         # update_or_create permite que si el admin presiona el botón dos veces por error, 

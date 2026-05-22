@@ -23,11 +23,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     
     # Asignación dinámica de permisos según la acción
     def get_permissions(self):
-        if self.action == 'registro':
-            # Cualquiera puede registrarse sin tener token
+        if self.action in ('registro', 'por_rol'):
             return [AllowAny()]
-        # Para ver usuarios, editarlos o desactivarlos, se requiere token
-        # (Más adelante puedes cambiar esto a tu permiso [EsAdministrador])
         return [IsAuthenticated()]
 
     @action(detail=True, methods=['put'])
@@ -55,6 +52,18 @@ class UsuarioViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
             
+    @action(detail=False, methods=['get'], url_path='por_rol')
+    def por_rol(self, request):
+        rol_nombre = request.query_params.get('rol')
+        if not rol_nombre:
+            return Response({'error': "Parámetro 'rol' requerido"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            rol = Rol.objects.get(nombre=rol_nombre)
+        except Rol.DoesNotExist:
+            return Response({'error': 'Rol no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+        usuarios = Usuario.objects.filter(rol=rol, is_active=True).values('id', 'email', 'nombre', 'username')
+        return Response(list(usuarios))
+
     # Acción personalizada para el registro: Crea el endpoint /usuarios/registro/
     @action(detail=False, methods=['post'])
     def registro(self, request):

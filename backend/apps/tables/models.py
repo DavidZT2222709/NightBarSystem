@@ -13,6 +13,6 @@ class Table(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS_MESA, default='available')
 
     def __str__(self):
-        return f"Mesa {self.numero} - {self.get.estado_display()}"
+        return f"Mesa {self.numero} - {self.get_estado_display()}"
     
     

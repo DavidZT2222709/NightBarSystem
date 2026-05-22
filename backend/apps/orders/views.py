@@ -24,8 +24,12 @@ class PedidoViewSet(viewsets.ModelViewSet):
         ¡La magia de IroMarket ocurre aquí!
         El endpoint /api/orders/ devuelve datos diferentes dependiendo de QUIÉN pregunte.
         """
+        # Swagger genera el schema con un usuario anónimo — devolvemos queryset vacío
+        if getattr(self, 'swagger_fake_view', False):
+            return Pedido.objects.none()
+
         user = self.request.user
-        
+
         # 1. Vista del Bartender (RF-008: Cola FIFO)
         if user.rol.nombre == 'Bartender':
             today = timezone.localdate()

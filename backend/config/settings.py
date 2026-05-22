@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'social_django',
     'drf_yasg',
     'django_rest_passwordreset',
+    'cloudinary_storage',
+    'cloudinary',
 
     # Tus Apps Locales
     'apps.users',
@@ -174,7 +176,13 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# CORRECCIÓN: Necesario para guardar las fotos de los productos
+# --- CLOUDINARY (almacenamiento persistente de imágenes) ---
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    env('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': env('CLOUDINARY_API_SECRET', default=''),
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

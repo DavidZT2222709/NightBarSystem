@@ -84,7 +84,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # --- BASE DE DATOS (PostgreSQL) ---
-_DATABASE_URL = env('DATABASE_URL', default=None)
+# os.environ.get() lee directo del entorno del proceso (fiable en Railway/Docker)
+_DATABASE_URL = os.environ.get('DATABASE_URL') or env('DATABASE_URL', default=None)
 if _DATABASE_URL:
     DATABASES = {'default': dj_database_url.parse(_DATABASE_URL, conn_max_age=600)}
 else:

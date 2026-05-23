@@ -1,9 +1,9 @@
-
 <div align="center">
 
 # 🍹 IroMarket — Sistema de Gestión de Pedidos
 
 ### Backend · Django REST Framework · PostgreSQL
+### Frontend · React Native · Expo
 
 <br/>
 
@@ -12,6 +12,14 @@
 ![DRF](https://img.shields.io/badge/Django_REST-Framework-ff1709?style=for-the-badge&logo=django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+
+![React Native](https://img.shields.io/badge/React_Native-0.7x-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-SDK_50-000020?style=for-the-badge&logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React Navigation](https://img.shields.io/badge/React_Navigation-6.x-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-API_Client-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
+![Context API](https://img.shields.io/badge/React_Context-State_Management-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Expo Go](https://img.shields.io/badge/Expo_Go-Mobile_Testing-000020?style=for-the-badge&logo=expo&logoColor=white)
 
 <br/>
 
@@ -22,230 +30,393 @@
 
 </div>
 
----
+Sistema de Gestión Integral para Bares y Discotecas desarrollado como proyecto Capstone para la asignatura Ingeniería de Software II de la Universidad Industrial de Santander.
 
-## 📌 Contexto
-
-En el sector de disco-bares, los meseros deben memorizar pedidos y desplazarse hasta la barra para solicitarlos verbalmente, generando errores y sobrecarga en horas de alta afluencia. **IroMarket** soluciona esto mediante una plataforma digital que conecta el salón con la barra y centraliza la gestión del negocio.
+NightBarSystem es una solución fullstack orientada a optimizar la operación de bares y discotecas mediante la digitalización de procesos como gestión de pedidos, administración de mesas, control de inventario y seguimiento de órdenes en tiempo real.
 
 ---
 
-## 🎯 Roles del sistema
+# 📌 Descripción del Proyecto
 
-| Rol | Plataforma | Responsabilidad |
-|---|---|---|
-| 🧑‍🍳 **Mesero** | React Native (móvil) | Crea y envía pedidos desde la mesa |
-| 🍸 **Bartender** | React (pantalla fija) | Gestiona la cola de pedidos en la barra |
-| 👔 **Administrador** | React Native (móvil) | Controla el negocio y consulta estadísticas |
+NightBarSystem busca reemplazar los procesos manuales utilizados en establecimientos de entretenimiento nocturno, permitiendo centralizar la información operativa en una única plataforma móvil.
 
----
+El sistema está diseñado para tres tipos principales de usuarios:
 
-## 🗂️ Estructura del proyecto
+* **Meseros** → Gestión de mesas y pedidos.
+* **Bartenders** → Atención de la cola de preparación de órdenes.
+* **Administradores** → Control de inventario, usuarios, reportes y configuración general.
 
-```
-backend/
-├── apps/
-│   ├── users/          # Autenticación y gestión de roles
-│   ├── tables/         # Gestión de mesas
-│   ├── products/       # Catálogo de productos
-│   ├── orders/         # Flujo de pedidos
-│   └── stats/          # Reportes y estadísticas
-├── config/
-│   ├── settings.py     # Configuración central
-│   ├── urls.py         # Rutas raíz
-│   ├── wsgi.py
-│   └── asgi.py
-├── core/
-│   └── exceptions.py   # Manejo global de errores
-├── manage.py
-├── requirements.txt
-└── .env                # Variables de entorno (no se sube a Git)
-```
+La solución fue desarrollada bajo una arquitectura cliente-servidor utilizando:
+
+* Backend: Django REST Framework + SimpleJWT
+* Frontend: React Native + Expo + TypeScript
+* Base de datos: SQLite (desarrollo) / PostgreSQL (producción)
 
 ---
 
-## 🚀 Instalación y configuración
+# 🚀 Características Principales
 
-### 1. Clonar el repositorio
+## 🔐 Autenticación y Roles
+
+* Login seguro mediante JWT.
+* Control de acceso basado en roles.
+* Refresh automático de tokens.
+* Gestión de usuarios y permisos.
+
+## 🍺 Gestión de Pedidos
+
+* Creación y modificación de pedidos en mesa.
+* Asociación de órdenes a mesas y meseros.
+* Seguimiento del estado de pedidos.
+* Observaciones y cantidades personalizadas.
+
+## 🍸 Cola del Bartender
+
+* Visualización en tiempo real de órdenes pendientes.
+* Cambio de estado de preparación.
+* Flujo FIFO para atención de pedidos.
+
+## 📦 Control de Inventario
+
+* Registro de entradas y salidas de stock.
+* Alertas automáticas de stock mínimo.
+* Historial de movimientos de inventario.
+
+## 🪑 Gestión de Mesas
+
+* Configuración de mesas y capacidad.
+* Visualización del estado en tiempo real.
+* Cambio automático de estados.
+
+## 📊 Reportes y Estadísticas
+
+* Reportes diarios, semanales y mensuales.
+* Métricas de ventas.
+* Productos más vendidos.
+* Exportación de reportes.
+
+---
+
+# 🏗️ Arquitectura del Sistema
+
+NightBarSystem implementa una arquitectura cliente-servidor de tres capas:
+
+1. **Capa de Presentación**
+
+   * Aplicación móvil desarrollada con React Native y Expo.
+
+2. **Capa de Lógica de Negocio**
+
+   * API REST desarrollada con Django REST Framework.
+
+3. **Capa de Persistencia**
+
+   * Base de datos relacional SQLite/PostgreSQL.
+
+La comunicación entre frontend y backend se realiza mediante HTTP/HTTPS utilizando JSON y autenticación JWT.
+
+---
+
+# 🛠️ Tecnologías Utilizadas
+
+| Tecnología            | Uso                      |
+| --------------------- | ------------------------ |
+| Django REST Framework | Backend API REST         |
+| SimpleJWT             | Autenticación JWT        |
+| React Native          | Desarrollo móvil         |
+| Expo                  | Entorno multiplataforma  |
+| TypeScript            | Tipado estático frontend |
+| SQLite                | Base de datos desarrollo |
+| PostgreSQL            | Base de datos producción |
+| Git + GitHub          | Control de versiones     |
+| Postman               | Pruebas API              |
+| drf-spectacular       | Documentación OpenAPI    |
+
+---
+
+# 📂 Estructura General del Proyecto
 
 ```bash
-git clone https://github.com/tu-usuario/IroMarket-ISII.git
-cd IroMarket-ISII/backend
+NightBarSystem/
+│
+├── backend/
+│   ├── apps/
+│   │   ├── orders/
+│   │   ├── products/
+│   │   ├── stats/
+│   │   ├── tables/
+│   │   └── users/
+│   │
+│   ├── config/
+│   ├── core/
+│   └── media/
+│       └── productos_img/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── QuickLoginList.tsx
+│   │   │
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx
+│   │   │
+│   │   ├── navigation/
+│   │   │
+│   │   ├── screens/
+│   │   │   ├── AdminHome.tsx
+│   │   │   ├── AdminLogin.tsx
+│   │   │   ├── BartenderHome.tsx
+│   │   │   ├── BartenderLogin.tsx
+│   │   │   ├── MeseroHome.tsx
+│   │   │   ├── MeseroLogin.tsx
+│   │   │   └── RoleSelector.tsx
+│   │   │
+│   │   ├── services/
+│   │   │   └── api.ts
+│   │   │
+│   │   ├── types/
+│   │   └── theme.ts
+│   │
+│   ├── .expo/
+│   └── node_modules/
+│
+├── docs/
+├── README.md
+└── docker-compose.yml
 ```
 
-### 2. Crear y activar el entorno virtual
+---
+
+# ⚙️ Instalación del Proyecto
+
+## 📌 Requisitos Previos
+
+* Python 3.11+
+* Node.js 18+
+* npm o yarn
+* Expo CLI
+* Git
+* PostgreSQL (opcional para producción)
+
+---
+
+# 🔧 Configuración Backend
+
+## 1. Clonar repositorio
 
 ```bash
-python -m venv env
-
-# Windows
-env\Scripts\activate
-
-# Mac / Linux
-source env/bin/activate
+git clone https://github.com/USUARIO/NightBarSystem.git
+cd NightBarSystem
 ```
 
-### 3. Instalar dependencias
+## 2. Crear entorno virtual
+
+```bash
+python -m venv venv
+```
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+## 3. Instalar dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar variables de entorno
-
-Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
-
-```env
-SECRET_KEY=tu_secret_key_de_django
-DEBUG=True
-
-DB_NAME=discobar_db
-DB_USER=discobar_user
-DB_PASSWORD=tu_contraseña
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-> 💡 Para generar una `SECRET_KEY` segura:
-> ```bash
-> python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-> ```
-
-### 5. Crear la base de datos en PostgreSQL
-
-```sql
-CREATE DATABASE discobar_db;
-CREATE USER discobar_user WITH PASSWORD 'tu_contraseña';
-GRANT ALL PRIVILEGES ON DATABASE discobar_db TO discobar_user;
-```
-
-### 6. Aplicar migraciones
+## 4. Ejecutar migraciones
 
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 7. Crear superusuario
+## 5. Crear superusuario
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 8. Levantar el servidor
+## 6. Ejecutar servidor
 
 ```bash
 python manage.py runserver
 ```
 
-El servidor estará disponible en `http://localhost:8000`  
-Panel de administración en `http://localhost:8000/admin/`
+El backend quedará disponible en:
 
----
-
-## 📡 Endpoints de la API
-
-### 🔐 Autenticación — `/api/users/`
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `POST` | `/api/users/login/` | Iniciar sesión → devuelve token JWT |
-| `POST` | `/api/users/logout/` | Cerrar sesión → invalida el token |
-| `GET` | `/api/users/me/` | Obtener datos del usuario activo |
-
-### 🪑 Mesas — `/api/tables/`
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/api/tables/` | Listar todas las mesas |
-| `PATCH` | `/api/tables/{id}/` | Actualizar estado de una mesa |
-
-### 🍺 Productos — `/api/products/`
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/api/products/` | Listar productos disponibles |
-
-### 📋 Pedidos — `/api/orders/`
-
-| Método | Endpoint | Rol | Descripción |
-|---|---|---|---|
-| `POST` | `/api/orders/` | Mesero | Crear y enviar pedido |
-| `GET` | `/api/orders/mine/` | Mesero | Ver mis pedidos activos |
-| `GET` | `/api/orders/history/` | Mesero | Historial de pedidos del día |
-| `GET` | `/api/orders/queue/` | Bartender | Cola de pedidos (FIFO) |
-| `GET` | `/api/orders/queue/?status=pending` | Bartender | Filtrar por estado |
-| `PATCH` | `/api/orders/{id}/` | Bartender | Cambiar estado del pedido |
-
-### 📊 Estadísticas — `/api/stats/`
-
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/api/stats/daily/` | Reporte del día (ingresos, top productos, pedidos por mesero) |
-| `GET` | `/api/stats/monthly/` | Reporte mensual agrupado por día |
-
----
-
-## 🔄 Flujo del sistema
-
-```
-Mesero (móvil)                  Backend                  Bartender (pantalla)
-     │                              │                              │
-     │── POST /api/orders/ ────────►│                              │
-     │                              │── Pedido guardado            │
-     │                              │── Status: pending ──────────►│
-     │                              │                              │
-     │◄─ GET /api/orders/mine/ ─────│         Bartender acepta     │
-     │   [status: preparing]        │◄── PATCH /api/orders/{id}/ ──│
-     │                              │── Status: preparing          │
-     │                              │                              │
-     │◄─ [status: delivered] ───────│◄── PATCH /api/orders/{id}/ ──│
-                                    │── Status: delivered          │
+```bash
+http://127.0.0.1:8000/
 ```
 
 ---
 
-## 🔑 Autenticación
+# 📱 Configuración Frontend
 
-La API usa **JWT (JSON Web Tokens)** con tokens de acceso de 8 horas, pensados para durar un turno de trabajo completo.
+## 1. Entrar al frontend
 
-Para autenticar las peticiones, incluye el token en el header:
-
+```bash
+cd frontend
 ```
-Authorization: Bearer <tu_access_token>
+
+## 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+## 3. Ejecutar Expo
+
+```bash
+npx expo start
+```
+
+Luego escanea el QR desde la aplicación Expo Go.
+
+---
+
+# 🔐 Variables de Entorno
+
+## Backend (.env)
+
+```env
+DEBUG=True
+SECRET_KEY=your_secret_key
+ALLOWED_HOSTS=*
+DATABASE_URL=sqlite:///db.sqlite3
+```
+
+## Frontend (.env)
+
+```env
+EXPO_PUBLIC_API_URL=http://TU_IP_LOCAL:8000/api
 ```
 
 ---
 
-## 📦 Dependencias principales
+# 📑 API REST
 
+La documentación de la API se genera automáticamente mediante OpenAPI.
+
+## Swagger UI
+
+```bash
+http://127.0.0.1:8000/api/docs/
 ```
-django
-djangorestframework
-djangorestframework-simplejwt
-django-cors-headers
-psycopg2-binary
-python-decouple
-drf-spectacular
+
+## OpenAPI Schema
+
+```bash
+http://127.0.0.1:8000/api/schema/
 ```
 
 ---
 
-## 👥 Autores
+# 🧪 Pruebas
 
-| Nombre | Código |
-|---|---|
-| David Alejandro Zapata Toro | 2222709 |
-| Juan Sebastián Suárez Cordero | 2201993 |
+El proyecto incluye pruebas funcionales basadas en los requerimientos definidos.
 
-**Profesor:** Urbano Eliécer Gómez Prada  
-**Materia:** Ingeniería de Software II  
-**Universidad:** Universidad Industrial de Santander (UIS) — Bucaramanga, Colombia
+## Casos de prueba cubiertos
+
+* Autenticación
+* Gestión de pedidos
+* Cola del bartender
+* Inventario
+* Gestión de mesas
+* Reportes
+* Gestión de usuarios
+
+## Ejecutar pruebas backend
+
+```bash
+python manage.py test
+```
 
 ---
 
-<div align="center">
+# 📈 Calidad del Software
 
-Hecho con 🍹 para los disco-bares de Bucaramanga
+NightBarSystem fue desarrollado tomando como referencia estándares y buenas prácticas de ingeniería de software:
 
-</div>
+* ISO/IEC 25010
+* UML 2.5.1
+* OpenAPI Specification 3.0.3
+* JWT RFC 7519
+* PEP 8
+* ESLint Airbnb
+* Git Flow
+
+---
+
+# 📊 Estado del Proyecto
+
+| Sprint                      | Estado       |
+| --------------------------- | ------------ |
+| S0 - Setup del Proyecto     | ✅ Completado |
+| S1 - Autenticación          | ✅ Completado |
+| S2 - Pedidos y Mesas        | ✅ Completado |
+| S3 - Bartender e Inventario | ✅ Completado |
+| S4 - Reportes               | ✅ Completado |
+| S5 - Pruebas y Despliegue   | ⏳ Pendiente  |
+| S6 - Documentación Final    | ⏳ Pendiente  |
+
+---
+
+# 🔮 Trabajo Futuro
+
+* Integración con pagos electrónicos.
+* Notificaciones push en tiempo real.
+* Panel administrativo web.
+* Reservas de mesas.
+* Fidelización de clientes.
+* Docker y CI/CD.
+* Pruebas de carga con Locust.
+
+---
+
+# 👥 Roles del Proyecto
+
+| Rol           | Responsabilidades                                                                     |
+| ------------- | ------------------------------------------------------------------------------------- |
+| Administrador | Gestión de usuarios, inventario, mesas, reportes y configuración general del sistema. |
+| Mesero        | Gestión de mesas, creación y seguimiento de pedidos en mesa.                          |
+| Bartender     | Atención y actualización de la cola de preparación de órdenes.                        |
+
+---
+
+# 👨‍💻 Integrantes
+
+| Nombre                        | Rol      |
+| ----------------------------- | -------- |
+| Juan Sebastián Suárez Cordero | Frontend |
+| David Alejandro Zapata Toro   | Backend  |
+
+---
+
+# 🎓 Información Académica
+
+* Universidad Industrial de Santander
+* Escuela de Ingeniería de Sistemas e Informática
+* Ingeniería de Software II
+* Proyecto Capstone
+* 2025-I
+
+---
+
+# 📄 Licencia
+
+Este proyecto fue desarrollado con fines académicos.
+
+---
+
+# ⭐ NightBarSystem
+
+Sistema de Gestión Integral para Bares y Discotecas.

@@ -3,6 +3,7 @@
 # 🍹 IroMarket — Sistema de Gestión de Pedidos
 
 ### Backend · Django REST Framework · PostgreSQL
+### Frontend · React Native · Expo
 
 <br/>
 
@@ -11,6 +12,14 @@
 ![DRF](https://img.shields.io/badge/Django_REST-Framework-ff1709?style=for-the-badge&logo=django&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+
+![React Native](https://img.shields.io/badge/React_Native-0.7x-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-SDK_50-000020?style=for-the-badge&logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![React Navigation](https://img.shields.io/badge/React_Navigation-6.x-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-API_Client-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
+![Context API](https://img.shields.io/badge/React_Context-State_Management-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Expo Go](https://img.shields.io/badge/Expo_Go-Mobile_Testing-000020?style=for-the-badge&logo=expo&logoColor=white)
 
 <br/>
 

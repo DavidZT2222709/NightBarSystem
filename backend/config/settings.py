@@ -32,7 +32,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    # cloudinary_storage debe ir ANTES de staticfiles para sobreescribir el storage
+    'cloudinary_storage',
     'django.contrib.staticfiles',
+    'cloudinary',
 
     # Apps de Terceros
     'rest_framework',
@@ -42,8 +45,6 @@ INSTALLED_APPS = [
     'social_django',
     'drf_yasg',
     'django_rest_passwordreset',
-    'cloudinary_storage',
-    'cloudinary',
 
     # Tus Apps Locales
     'apps.users',
